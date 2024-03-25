@@ -1,4 +1,4 @@
-# Customer Service
+# Customer Service Application
 ## Spring Boot Application, written in Java, that provides a RESTful API and lightweight persistence implementation for retrieving, storing, and creating customer data.
 
 ### Features
