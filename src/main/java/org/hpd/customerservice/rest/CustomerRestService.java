@@ -40,13 +40,11 @@ public class CustomerRestService {
             @ApiResponse(responseCode = "200", description = "Customers found",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CustomerEntity[].class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid query type",
-                    content = @Content),
             @ApiResponse(responseCode = "404", description = "Customers not found",
                     content = @Content) })
     @GetMapping("/customers")
     public ResponseEntity getCustomers(@RequestParam(value = "city", required = false) String city) {
-        if(city == null) {
+        if (city == null) {
             try {
                 List<CustomerEntity> customerEntities = this.customerManager.getAllCustomers();
                 return ResponseEntity.ok(customerEntities);
@@ -72,8 +70,6 @@ public class CustomerRestService {
             @ApiResponse(responseCode = "200", description = "Customer found",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CustomerEntity.class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid ID type",
-                    content = @Content),
             @ApiResponse(responseCode = "404", description = "Customer not found",
                     content = @Content) })
     @GetMapping("/customers/{customerId}")
@@ -102,13 +98,13 @@ public class CustomerRestService {
         try {
             CustomerEntity newCustomerEntity = this.customerManager.addNewCustomer(createCustomerRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(newCustomerEntity);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request body: fistName, lastName, email, and city are required");
         } catch (DataIntegrityViolationException e) {
             if (e.getCause().getMessage().contains("NULL not allowed")) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request body: fistName, lastName, email, and city are required");
             }
             return ResponseEntity.status(HttpStatus.CONFLICT).body("A customer with the provided email address already exists");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
         }
     }
 }

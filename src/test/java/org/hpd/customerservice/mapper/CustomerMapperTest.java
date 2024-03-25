@@ -16,7 +16,7 @@ class CustomerMapperTest {
     }
 
     @Test
-    void translateToEntity() {
+    void testTranslateToEntity_Success() {
         CreateCustomerRequest createCustomerRequest = new CreateCustomerRequest();
         createCustomerRequest.setFirstName("John");
         createCustomerRequest.setLastName("Doe");
