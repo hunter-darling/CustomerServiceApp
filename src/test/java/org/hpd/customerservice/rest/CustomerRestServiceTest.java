@@ -16,5 +16,5 @@ import static org.mockito.Mockito.when;
 
 class CustomerRestServiceTest {
 
-
+    // TODO: add more test cases!
 }
