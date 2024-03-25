@@ -18,14 +18,14 @@ import lombok.Setter;
 public class CustomerEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "customer_id")
     private Long customerId;
-    @Column(name = "first_name", length = 50, nullable = false)
+    @Column(name = "first_name", length = 50)
     private String firstName;
-    @Column(name = "last_name", length = 50, nullable = false)
+    @Column(name = "last_name", length = 50)
     private String lastName;
-    @Column(name = "email_address", length = 100, nullable = false)
+    @Column(name = "email_address", length = 100)
     private String emailAddress;
     @Column(name = "address", length = 225)
     private String address;
