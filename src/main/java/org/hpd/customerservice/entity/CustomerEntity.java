@@ -6,8 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Objects;
@@ -16,7 +17,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Table(name = "customers")
-@AllArgsConstructor
+@NoArgsConstructor
 public class CustomerEntity {
 
     @Id
@@ -24,6 +25,7 @@ public class CustomerEntity {
     @Column(name = "customer_id")
     private Long customerId;
     @Column(name = "first_name", length = 50)
+    @NotEmpty
     private String firstName;
     @Column(name = "last_name", length = 50)
     private String lastName;
@@ -38,7 +40,20 @@ public class CustomerEntity {
     @Column(name = "zip", length = 10)
     private String zip;
 
-    public CustomerEntity() {
+    public CustomerEntity(Long id, String firstName, String lastName, String emailAddress, String address, String city, String state, String zip) {
+        if (firstName == null || lastName == null || emailAddress == null || city == null
+                || firstName.isEmpty() || lastName.isEmpty() || emailAddress.isEmpty() || city.isEmpty()) {
+            throw new IllegalArgumentException();
+        } else {
+            this.customerId = id;
+            this.firstName = firstName;
+            this.lastName = lastName;
+            this.emailAddress = emailAddress;
+            this.address = address;
+            this.city = city;
+            this.state = state;
+            this.zip = zip;
+        }
     }
 
     @Override

@@ -58,7 +58,7 @@ public class CustomerRestService {
                 List<CustomerEntity> customerEntities = this.customerManager.getCustomersByCity(city);
                 return ResponseEntity.ok(customerEntities);
             } catch (SQLException e) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customers not found for city: " + city);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No customers found in " + city);
             } catch (RuntimeException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
             }
@@ -98,10 +98,9 @@ public class CustomerRestService {
         try {
             CustomerEntity newCustomerEntity = this.customerManager.addNewCustomer(createCustomerRequest);
             return ResponseEntity.status(HttpStatus.CREATED).body(newCustomerEntity);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request body: fistName, lastName, email, and city are required");
         } catch (DataIntegrityViolationException e) {
-            if (e.getCause().getMessage().contains("NULL not allowed")) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request body: fistName, lastName, email, and city are required");
-            }
             return ResponseEntity.status(HttpStatus.CONFLICT).body("A customer with the provided email address already exists");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");

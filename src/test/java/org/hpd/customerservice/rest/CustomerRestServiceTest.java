@@ -116,8 +116,7 @@ class CustomerRestServiceTest {
     @Test
     void testCreateCustomer_failure_400() {
         CreateCustomerRequest request = new CreateCustomerRequest();
-        DataIntegrityViolationException dataIntegrityViolationException = new DataIntegrityViolationException("", new SQLException("NULL not allowed"));
-        when(customerManager.addNewCustomer(request)).thenThrow(dataIntegrityViolationException);
+        when(customerManager.addNewCustomer(request)).thenThrow(IllegalArgumentException.class);
         ResponseEntity<CustomerEntity> newCustomerResponseEntity = new ResponseEntity<>(new CustomerEntity(), null, 400);
         assertEquals(newCustomerResponseEntity.getStatusCode(), customerRestService.addCustomer(request).getStatusCode());
     }
