@@ -7,15 +7,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomerMapper {
 
-    public CustomerEntity translateToEntity(CreateCustomerRequest createCustomerRequest) {
-        return new CustomerEntity(null,
-            createCustomerRequest.getFirstName(),
-            createCustomerRequest.getLastName(),
-            createCustomerRequest.getEmailAddress(),
-            createCustomerRequest.getAddress(),
-            createCustomerRequest.getCity(),
-            createCustomerRequest.getState(),
-            createCustomerRequest.getZip()
-        );
-    }
+  public CustomerEntity translateToEntity(CreateCustomerRequest createCustomerRequest) {
+    return new CustomerEntity(
+        createCustomerRequest.getFirstName(),
+        createCustomerRequest.getLastName(),
+        createCustomerRequest.getEmailAddress(),
+        createCustomerRequest.getAddress(),
+        createCustomerRequest.getCity(),
+        createCustomerRequest.getState(),
+        createCustomerRequest.getZip());
+  }
 }
