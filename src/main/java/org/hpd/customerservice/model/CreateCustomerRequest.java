@@ -1,15 +1,24 @@
 package org.hpd.customerservice.model;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class CreateCustomerRequest {
-    private String firstName;
-    private String lastName;
-    private String emailAddress;
-    private String address;
-    private String city;
-    private String state;
-    private String zip;
+  @NotBlank(message = "firstName is required")
+  private String firstName;
+
+  @NotBlank(message = "lastName is required")
+  private String lastName;
+
+  @NotBlank(message = "emailAddress is required")
+  private String emailAddress;
+
+  private String address;
+
+  @NotBlank(message = "city is required")
+  private String city;
+
+  private String state;
+  private String zip;
 }
