@@ -5,11 +5,11 @@ import lombok.Data;
 
 @Data
 public class CreateCustomerRequest {
-    private String firstName;
-    private String lastName;
-    private String emailAddress;
-    private String address;
-    private String city;
-    private String state;
-    private String zip;
+  private String firstName;
+  private String lastName;
+  private String emailAddress;
+  private String address;
+  private String city;
+  private String state;
+  private String zip;
 }

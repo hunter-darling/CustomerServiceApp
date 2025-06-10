@@ -5,6 +5,7 @@
 - RESTful API
 - CRUD operations
 - In-memory database
+  - OSIV enabled (by default); nothing too complex in this little app
 - Swagger UI for API Documentation
 - Unit tests
 
