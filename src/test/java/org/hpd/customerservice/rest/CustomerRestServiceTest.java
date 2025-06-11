@@ -3,136 +3,161 @@ package org.hpd.customerservice.rest;
 import org.hpd.customerservice.entity.CustomerEntity;
 import org.hpd.customerservice.manager.CustomerManager;
 import org.hpd.customerservice.model.CreateCustomerRequest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@WebMvcTest(CustomerRestService.class)
 class CustomerRestServiceTest {
 
-  private CustomerRestService customerRestService;
+  @Autowired
+  private MockMvc mockMvc;
+
+  @Autowired
+  private ObjectMapper objectMapper;
+
+  @MockBean
   private CustomerManager customerManager;
 
-  @BeforeEach
-  void setUp() {
-    customerManager = mock(CustomerManager.class);
-    customerRestService = new CustomerRestService(customerManager);
-  }
-
   @Test
-  void testGetCustomers_noCity_success() throws SQLException {
+  void testGetCustomers_noCity_success() throws Exception {
     ArrayList<CustomerEntity> customers = new ArrayList<>();
     customers.add(new CustomerEntity());
     when(customerManager.getAllCustomers()).thenReturn(customers);
-    ResponseEntity<List<CustomerEntity>> customersResponseEntities = new ResponseEntity<>(List.of(new CustomerEntity()),
-        null, 200);
-    assertEquals(customersResponseEntities, customerRestService.getCustomers(null));
-    assertDoesNotThrow(() -> customerRestService.getCustomers(null));
+    mockMvc.perform(get("/customers"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
   }
 
   @Test
-  void testGetCustomers_withCity_success() throws SQLException {
+  void testGetCustomers_withCity_success() throws Exception {
     ArrayList<CustomerEntity> customers = new ArrayList<>();
     customers.add(new CustomerEntity());
     when(customerManager.getCustomersByCity(anyString())).thenReturn(customers);
-    ResponseEntity<List<CustomerEntity>> customersResponseEntities = new ResponseEntity<>(List.of(new CustomerEntity()),
-        null, 200);
-    assertEquals(customersResponseEntities, customerRestService.getCustomers("Some City"));
-    assertDoesNotThrow(() -> customerRestService.getCustomers("Some City"));
+    mockMvc.perform(get("/customers?city=Some City"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
   }
 
   @Test
-  void testGetCustomers_noCity_failure_404() throws SQLException {
+  void testGetCustomers_noCity_failure_404() throws Exception {
     when(customerManager.getAllCustomers()).thenThrow(SQLException.class);
-    ResponseEntity<CustomerEntity> customerResponseEntity = new ResponseEntity<>(new CustomerEntity(), null, 404);
-    assertEquals(customerResponseEntity.getStatusCode(), customerRestService.getCustomers(null).getStatusCode());
+    mockMvc.perform(get("/customers"))
+        .andExpect(status().isNotFound());
   }
 
   @Test
-  void testGetCustomers_noCity_failure_500() throws SQLException {
+  void testGetCustomers_noCity_failure_500() throws Exception {
     when(customerManager.getAllCustomers()).thenThrow(RuntimeException.class);
-    ResponseEntity<CustomerEntity> customerResponseEntity = new ResponseEntity<>(new CustomerEntity(), null, 500);
-    assertEquals(customerResponseEntity.getStatusCode(), customerRestService.getCustomers(null).getStatusCode());
+    mockMvc.perform(get("/customers"))
+        .andExpect(status().isInternalServerError());
   }
 
   @Test
-  void testGetCustomers_withCity_failure_404() throws SQLException {
+  void testGetCustomers_withCity_failure_404() throws Exception {
     when(customerManager.getCustomersByCity(anyString())).thenThrow(SQLException.class);
-    ResponseEntity<CustomerEntity> customerResponseEntity = new ResponseEntity<>(new CustomerEntity(), null, 404);
-    assertEquals(customerResponseEntity.getStatusCode(), customerRestService.getCustomers("Some City").getStatusCode());
+    mockMvc.perform(get("/customers?city=Some City"))
+        .andExpect(status().isNotFound());
   }
 
   @Test
-  void testGetCustomers_withCity_failure_500() throws SQLException {
+  void testGetCustomers_withCity_failure_500() throws Exception {
     when(customerManager.getCustomersByCity(anyString())).thenThrow(RuntimeException.class);
-    ResponseEntity<CustomerEntity> customerResponseEntity = new ResponseEntity<>(new CustomerEntity(), null, 500);
-    assertEquals(customerResponseEntity.getStatusCode(), customerRestService.getCustomers("Some City").getStatusCode());
+    mockMvc.perform(get("/customers?city=Some City"))
+        .andExpect(status().isInternalServerError());
   }
 
   @Test
-  void testGetCustomer_success() throws SQLException {
+  void testGetCustomer_success() throws Exception {
     when(customerManager.getCustomerById(anyLong())).thenReturn(new CustomerEntity());
-    ResponseEntity<CustomerEntity> customerResponseEntity = new ResponseEntity<>(new CustomerEntity(), null, 200);
-    assertEquals(customerResponseEntity, customerRestService.getCustomerById(1L));
-    assertDoesNotThrow(() -> customerRestService.getCustomerById(1L));
+    mockMvc.perform(get("/customers/1"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
   }
 
   @Test
-  void testGetCustomer_failure_404() throws SQLException {
+  void testGetCustomer_failure_404() throws Exception {
     when(customerManager.getCustomerById(anyLong())).thenThrow(SQLException.class);
-    ResponseEntity<CustomerEntity> customerResponseEntity = new ResponseEntity<>(new CustomerEntity(), null, 404);
-    assertEquals(customerResponseEntity.getStatusCode(), customerRestService.getCustomerById(1L).getStatusCode());
+    mockMvc.perform(get("/customers/1"))
+        .andExpect(status().isNotFound());
   }
 
   @Test
-  void testGetCustomer_failure_500() throws SQLException {
+  void testGetCustomer_failure_500() throws Exception {
     when(customerManager.getCustomerById(anyLong())).thenThrow(RuntimeException.class);
-    ResponseEntity<CustomerEntity> customerResponseEntity = new ResponseEntity<>(new CustomerEntity(), null, 500);
-    assertEquals(customerResponseEntity.getStatusCode(), customerRestService.getCustomerById(1L).getStatusCode());
+    mockMvc.perform(get("/customers/1"))
+        .andExpect(status().isInternalServerError());
   }
 
   @Test
-  void testCreateCustomer_success() {
+  void testCreateCustomer_success() throws Exception {
     CreateCustomerRequest request = new CreateCustomerRequest();
-    when(customerManager.addNewCustomer(request)).thenReturn(new CustomerEntity());
-    ResponseEntity<CustomerEntity> newCustomerResponseEntity = new ResponseEntity<>(new CustomerEntity(), null, 201);
-    assertEquals(newCustomerResponseEntity, customerRestService.addCustomer(request));
-    assertDoesNotThrow(() -> customerRestService.addCustomer(request));
+    request.setFirstName("John");
+    request.setLastName("Doe");
+    request.setEmailAddress("john.doe@example.com");
+    request.setCity("Test City");
+    when(customerManager.addNewCustomer(any())).thenReturn(new CustomerEntity());
+    mockMvc.perform(post("/customers")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isCreated())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
   }
 
   @Test
-  void testCreateCustomer_failure_400() {
+  void testCreateCustomer_failure_400() throws Exception {
     CreateCustomerRequest request = new CreateCustomerRequest();
-    when(customerManager.addNewCustomer(request)).thenThrow(IllegalArgumentException.class);
-    ResponseEntity<CustomerEntity> newCustomerResponseEntity = new ResponseEntity<>(new CustomerEntity(), null, 400);
-    assertEquals(newCustomerResponseEntity.getStatusCode(), customerRestService.addCustomer(request).getStatusCode());
+    request.setFirstName("");
+    request.setLastName("");
+    request.setEmailAddress("");
+    request.setCity("");
+    mockMvc.perform(post("/customers")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isBadRequest());
   }
 
   @Test
-  void testCreateCustomer_failure_409() {
+  void testCreateCustomer_failure_409() throws Exception {
     CreateCustomerRequest request = new CreateCustomerRequest();
-    DataIntegrityViolationException dataIntegrityViolationException = new DataIntegrityViolationException("",
-        new SQLException("UNIQUE constraint violated"));
-    when(customerManager.addNewCustomer(request)).thenThrow(dataIntegrityViolationException);
-    ResponseEntity<CustomerEntity> newCustomerResponseEntity = new ResponseEntity<>(new CustomerEntity(), null, 409);
-    assertEquals(newCustomerResponseEntity.getStatusCode(), customerRestService.addCustomer(request).getStatusCode());
+    request.setFirstName("John");
+    request.setLastName("Doe");
+    request.setEmailAddress("john.doe@example.com");
+    request.setCity("Test City");
+    when(customerManager.addNewCustomer(any()))
+        .thenThrow(new DataIntegrityViolationException("", new SQLException("UNIQUE constraint violated")));
+    mockMvc.perform(post("/customers")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isConflict());
   }
 
   @Test
-  void testCreateCustomer_failure_500() {
+  void testCreateCustomer_failure_500() throws Exception {
     CreateCustomerRequest request = new CreateCustomerRequest();
-    when(customerManager.addNewCustomer(request)).thenThrow(RuntimeException.class);
-    ResponseEntity<CustomerEntity> newCustomerResponseEntity = new ResponseEntity<>(new CustomerEntity(), null, 500);
-    assertEquals(newCustomerResponseEntity.getStatusCode(), customerRestService.addCustomer(request).getStatusCode());
+    request.setFirstName("John");
+    request.setLastName("Doe");
+    request.setEmailAddress("john.doe@example.com");
+    request.setCity("Test City");
+    when(customerManager.addNewCustomer(any())).thenThrow(RuntimeException.class);
+    mockMvc.perform(post("/customers")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(objectMapper.writeValueAsString(request)))
+        .andExpect(status().isInternalServerError());
   }
 }
