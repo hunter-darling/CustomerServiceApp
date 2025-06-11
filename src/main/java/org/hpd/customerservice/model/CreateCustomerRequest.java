@@ -3,6 +3,8 @@ package org.hpd.customerservice.model;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+// TDOD: add RegEx validation for email address
+
 @Data
 public class CreateCustomerRequest {
   @NotBlank(message = "firstName is required")
