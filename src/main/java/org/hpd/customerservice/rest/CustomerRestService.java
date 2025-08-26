@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.hpd.customerservice.entity.CustomerEntity;
 import org.hpd.customerservice.manager.CustomerManager;
 import org.hpd.customerservice.model.CreateCustomerRequest;
+import org.hpd.customerservice.model.CustomerResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -42,24 +43,24 @@ public class CustomerRestService {
           @Content(mediaType = "application/json", schema = @Schema(implementation = CustomerEntity[].class)) }),
       @ApiResponse(responseCode = "404", description = "Customers not found", content = @Content) })
   @GetMapping("/customers")
-  public ResponseEntity getCustomers(@RequestParam(value = "city", required = false) String city) {
+  public CustomerResponseEntity getCustomers(@RequestParam(value = "city", required = false) String city) {
     if (city == null) {
       try {
         List<CustomerEntity> customerEntities = this.customerManager.getAllCustomers();
-        return ResponseEntity.ok(customerEntities);
+        return new CustomerResponseEntity(customerEntities, HttpStatus.OK);
       } catch (SQLException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customers not found");
+        return new CustomerResponseEntity("Customers not found", HttpStatus.NOT_FOUND);
       } catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+        return new CustomerResponseEntity("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
       }
     } else {
       try {
         List<CustomerEntity> customerEntities = this.customerManager.getCustomersByCity(city);
-        return ResponseEntity.ok(customerEntities);
+        return new CustomerResponseEntity(customerEntities, HttpStatus.OK);
       } catch (SQLException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No customers found in " + city);
+        return new CustomerResponseEntity("No customers found in " + city, HttpStatus.NOT_FOUND);
       } catch (RuntimeException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+        return new CustomerResponseEntity("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
   }
@@ -70,14 +71,14 @@ public class CustomerRestService {
           @Content(mediaType = "application/json", schema = @Schema(implementation = CustomerEntity.class)) }),
       @ApiResponse(responseCode = "404", description = "Customer not found", content = @Content) })
   @GetMapping("/customers/{customerId}")
-  public ResponseEntity getCustomerById(@PathVariable("customerId") Long customerId) {
+  public CustomerResponseEntity getCustomerById(@PathVariable("customerId") Long customerId) {
     try {
       CustomerEntity customerEntity = this.customerManager.getCustomerById(customerId);
-      return ResponseEntity.ok(customerEntity);
+      return new CustomerResponseEntity(customerEntity, HttpStatus.OK);
     } catch (SQLException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found");
+      return new CustomerResponseEntity("Customer not found", HttpStatus.NOT_FOUND);
     } catch (RuntimeException e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+      return new CustomerResponseEntity("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -88,15 +89,15 @@ public class CustomerRestService {
       @ApiResponse(responseCode = "400", description = "Invalid request body: fistName, lastName, email, and city are required", content = @Content),
       @ApiResponse(responseCode = "409", description = "A customer with the provided email address already exists", content = @Content) })
   @PostMapping("/customers")
-  public ResponseEntity addCustomer(@Valid @RequestBody CreateCustomerRequest createCustomerRequest) {
+  public CustomerResponseEntity addCustomer(@Valid @RequestBody CreateCustomerRequest createCustomerRequest) {
     try {
       CustomerEntity newCustomerEntity = this.customerManager.addNewCustomer(createCustomerRequest);
-      return ResponseEntity.status(HttpStatus.CREATED).body(newCustomerEntity);
+      return new CustomerResponseEntity(newCustomerEntity, HttpStatus.CREATED);
     } catch (DataIntegrityViolationException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT)
-          .body("A customer with the provided email address already exists");
+      return new CustomerResponseEntity("A customer with the provided email address already exists",
+          HttpStatus.CONFLICT);
     } catch (RuntimeException e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+      return new CustomerResponseEntity("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
