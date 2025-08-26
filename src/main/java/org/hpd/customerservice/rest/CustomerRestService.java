@@ -102,9 +102,7 @@ public class CustomerRestService {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity handleValidationExceptions(MethodArgumentNotValidException ex) {
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(
-            "Invalid request body. Missing one or more of the required fields: First Name, Last Name, Email Address, and City");
+  public CustomerResponseEntity handleValidationExceptions(MethodArgumentNotValidException ex) {
+    return new CustomerResponseEntity("Invalid request body. Missing one or more of the required fields: First Name, Last Name, Email Address, and City", HttpStatus.BAD_REQUEST);
   }
 }
